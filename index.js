@@ -6,9 +6,12 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const app = express();
-const port = 3000;
 const baseApiUrl = "https://youtube.googleapis.com/youtube/v3";
 const apiKey = process.env.YOUTUBE_API_KEY;
+
+app.get("/", (req, res) => {
+  res.send("Hello from our API");
+});
 
 // =========================
 // 📺 YOUTUBE API ROUTE
@@ -97,6 +100,4 @@ app.get("/tiktok/:username", async (req, res) => {
   }
 });
 
-app.listen(port, () =>
-  console.log(`✅ Server running at http://localhost:${port}`)
-);
+export default app;
