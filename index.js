@@ -1,8 +1,5 @@
 const express = require("express");
 const axios = require("axios");
-const puppeteer = require("puppeteer-core");
-// 🔽 1. REQUIRE '@sparticuz/chromium' INSTEAD
-const chrome = require("@sparticuz/chromium");
 const dotenv = require("dotenv");
 
 dotenv.config();
