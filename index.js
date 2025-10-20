@@ -64,7 +64,10 @@ app.get("/instagram/:username", async (req, res) => {
     const followers = await page.evaluate(() => {
       const el = document.querySelector('meta[name="description"]');
       const text = el ? el.getAttribute("content") : "";
-      const match = text.match(/([\d.,])([KMB])?\s*Followers/i);
+
+      console.log(text);
+
+      const match = text.match(/([\d.,]+(?:[.,]\d+)?)\s*([KMB])?\s*Followers/i);
 
       if (!match) return "Not found";
 
