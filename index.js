@@ -29,14 +29,14 @@ app.get("/youtube/:handle", async (req, res) => {
 });
 
 app.get("/instagram/:username", async (req, res) => {
-  const username = req.params.username; // example: /tiktok/taylorswift
+  const username = req.params.username;
 
   const options = {
     method: "GET",
     url: "https://instagram-looter2.p.rapidapi.com/profile2",
-    params: { uniqueId: username },
+    params: { username: username },
     headers: {
-      "x-rapidapi-key": process.env.RAPIDAPI_KEY, // use .env for security
+      "x-rapidapi-key": process.env.RAPID_API_KEY, // use .env for security
       "x-rapidapi-host": "instagram-looter2.p.rapidapi.com",
     },
   };
@@ -47,7 +47,7 @@ app.get("/instagram/:username", async (req, res) => {
 
     res.json({
       username,
-      followers: data.follower_count || "Not found",
+      followers: response.data.follower_count,
     });
   } catch (error) {
     console.error(error);
@@ -56,14 +56,14 @@ app.get("/instagram/:username", async (req, res) => {
 });
 
 app.get("/tiktok/:username", async (req, res) => {
-  const username = req.params.username; // example: /tiktok/taylorswift
+  const username = req.params.username;
 
   const options = {
     method: "GET",
     url: "https://tiktok-api23.p.rapidapi.com/api/user/info",
     params: { uniqueId: username },
     headers: {
-      "x-rapidapi-key": process.env.RAPIDAPI_KEY, // use .env for security
+      "x-rapidapi-key": process.env.RAPID_API_KEY, // use .env for security
       "x-rapidapi-host": "tiktok-api23.p.rapidapi.com",
     },
   };
@@ -81,5 +81,7 @@ app.get("/tiktok/:username", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch TikTok data" });
   }
 });
+
+app.listen(3000, () => console.log("Server running on port 3000"));
 
 module.exports = app;
