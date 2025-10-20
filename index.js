@@ -54,7 +54,7 @@ app.get("/instagram/:username", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to fetch TikTok data" });
+    res.status(500).json({ error: "Failed to fetch Instagram data" });
   }
 });
 
