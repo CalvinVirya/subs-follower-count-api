@@ -1,6 +1,9 @@
 const express = require("express");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
+// 🔽 IMPORT 'puppeteer-core' AND 'chrome-aws-lambda'
+const puppeteer = require("puppeteer-core");
+const chrome = require("chrome-aws-lambda");
+
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -37,9 +40,22 @@ app.get("/youtube/:handle", async (req, res) => {
 // =========================
 app.get("/instagram/:username", async (req, res) => {
   const { username } = req.params;
+  let browser = null; // Define browser outside try block to close it in finally
+
   try {
-    const browser = await puppeteer.launch({ headless: true });
+    // 🔽 LAUNCH PUPPETEER WITH CHROME-AWS-LAMBDA
+    browser = await puppeteer.launch({
+      args: chrome.args,
+      executablePath: await chrome.executablePath,
+      headless: chrome.headless,
+    });
+
     const page = await browser.newPage();
+    // Optional: Set a user-agent to mimic a real browser
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+    );
+
     await page.goto(`https://www.instagram.com/${username}/`, {
       waitUntil: "networkidle2",
     });
@@ -47,22 +63,28 @@ app.get("/instagram/:username", async (req, res) => {
     const followers = await page.evaluate(() => {
       const el = document.querySelector('meta[name="description"]');
       const text = el ? el.getAttribute("content") : "";
-      const match = text.match(/([\d.,]+)\s*([KMB])?\s*Followers/i);
+      // Updated regex to be more flexible with follower text
+      const match = text.match(/([\d.,]+(?:[.,]\d+)?)\s*([KMB])?\s*Followers/i);
 
       if (!match) return "Not found";
 
-      const value = parseFloat(match[1].replace(",", "."));
-      const suffix = match[2] || null;
+      // Handle numbers like '1,234.5K' or '1.2M'
+      const value = parseFloat(match[1].replace(/,/g, ""));
+      const suffix = match[2] ? match[2].toUpperCase() : null;
       const multipliers = { K: 1e3, M: 1e6, B: 1e9, null: 1 };
 
       return Math.round(value * multipliers[suffix]);
     });
 
-    await browser.close();
     res.json({ username, followers });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to scrape Instagram" });
+  } finally {
+    // 🔽 ENSURE BROWSER IS ALWAYS CLOSED
+    if (browser) {
+      await browser.close();
+    }
   }
 });
 
@@ -71,9 +93,21 @@ app.get("/instagram/:username", async (req, res) => {
 // =========================
 app.get("/tiktok/:username", async (req, res) => {
   const { username } = req.params;
+  let browser = null; // Define browser outside try block
+
   try {
-    const browser = await puppeteer.launch({ headless: true });
+    // 🔽 LAUNCH PUPPETEER WITH CHROME-AWS-LAMBDA
+    browser = await puppeteer.launch({
+      args: chrome.args,
+      executablePath: await chrome.executablePath,
+      headless: chrome.headless,
+    });
+
     const page = await browser.newPage();
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+    );
+
     await page.goto(`https://www.tiktok.com/@${username}`, {
       waitUntil: "networkidle2",
     });
@@ -81,23 +115,28 @@ app.get("/tiktok/:username", async (req, res) => {
     const followers = await page.evaluate(() => {
       const el = document.querySelector('meta[name="description"]');
       const text = el ? el.getAttribute("content") : "";
-      const match = text.match(/([\d.,]+)\s*([KMB])?\s*Followers/i);
+      const match = text.match(/([\d.,]+(?:[.,]\d+)?)\s*([KMB])?\s*Followers/i);
 
       if (!match) return "Not found";
 
-      const value = parseFloat(match[1].replace(",", "."));
-      const suffix = match[2] || null;
+      const value = parseFloat(match[1].replace(/,/g, ""));
+      const suffix = match[2] ? match[2].toUpperCase() : null;
       const multipliers = { K: 1e3, M: 1e6, B: 1e9, null: 1 };
 
       return Math.round(value * multipliers[suffix]);
     });
 
-    await browser.close();
     res.json({ username, followers });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to scrape TikTok" });
+  } finally {
+    // 🔽 ENSURE BROWSER IS ALWAYS CLOSED
+    if (browser) {
+      await browser.close();
+    }
   }
 });
 
-export default app;
+// 🔽 USE 'module.exports' TO EXPORT THE APP FOR VERCEL
+module.exports = app;
