@@ -1,9 +1,8 @@
 const express = require("express");
 const axios = require("axios");
-// 🔽 IMPORT 'puppeteer-core' AND 'chrome-aws-lambda'
 const puppeteer = require("puppeteer-core");
-const chrome = require("chrome-aws-lambda");
-
+// 🔽 1. REQUIRE '@sparticuz/chromium' INSTEAD
+const chrome = require("@sparticuz/chromium");
 const dotenv = require("dotenv");
 
 dotenv.config();
@@ -18,6 +17,7 @@ app.get("/", (req, res) => {
 
 // =========================
 // 📺 YOUTUBE API ROUTE
+// (This route is unchanged)
 // =========================
 app.get("/youtube/:handle", async (req, res) => {
   try {
@@ -40,18 +40,19 @@ app.get("/youtube/:handle", async (req, res) => {
 // =========================
 app.get("/instagram/:username", async (req, res) => {
   const { username } = req.params;
-  let browser = null; // Define browser outside try block to close it in finally
+  let browser = null;
 
   try {
-    // 🔽 LAUNCH PUPPETEER WITH CHROME-AWS-LAMBDA
+    // 🔽 2. LAUNCH PUPPETEER WITH THE NEW PACKAGE
     browser = await puppeteer.launch({
       args: chrome.args,
-      executablePath: await chrome.executablePath,
-      headless: chrome.headless,
+      // 🔽 3. ADD '()' TO 'executablePath'
+      executablePath: await chrome.executablePath(),
+      // 🔽 4. USE 'headless: "new"'
+      headless: "new",
     });
 
     const page = await browser.newPage();
-    // Optional: Set a user-agent to mimic a real browser
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
     );
@@ -63,12 +64,10 @@ app.get("/instagram/:username", async (req, res) => {
     const followers = await page.evaluate(() => {
       const el = document.querySelector('meta[name="description"]');
       const text = el ? el.getAttribute("content") : "";
-      // Updated regex to be more flexible with follower text
       const match = text.match(/([\d.,]+(?:[.,]\d+)?)\s*([KMB])?\s*Followers/i);
 
       if (!match) return "Not found";
 
-      // Handle numbers like '1,234.5K' or '1.2M'
       const value = parseFloat(match[1].replace(/,/g, ""));
       const suffix = match[2] ? match[2].toUpperCase() : null;
       const multipliers = { K: 1e3, M: 1e6, B: 1e9, null: 1 };
@@ -81,7 +80,6 @@ app.get("/instagram/:username", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to scrape Instagram" });
   } finally {
-    // 🔽 ENSURE BROWSER IS ALWAYS CLOSED
     if (browser) {
       await browser.close();
     }
@@ -93,14 +91,16 @@ app.get("/instagram/:username", async (req, res) => {
 // =========================
 app.get("/tiktok/:username", async (req, res) => {
   const { username } = req.params;
-  let browser = null; // Define browser outside try block
+  let browser = null;
 
   try {
-    // 🔽 LAUNCH PUPPETEER WITH CHROME-AWS-LAMBDA
+    // 🔽 2. LAUNCH PUPPETEER WITH THE NEW PACKAGE
     browser = await puppeteer.launch({
       args: chrome.args,
-      executablePath: await chrome.executablePath,
-      headless: chrome.headless,
+      // 🔽 3. ADD '()' TO 'executablePath'
+      executablePath: await chrome.executablePath(),
+      // 🔽 4. USE 'headless: "new"'
+      headless: "new",
     });
 
     const page = await browser.newPage();
@@ -131,12 +131,10 @@ app.get("/tiktok/:username", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to scrape TikTok" });
   } finally {
-    // 🔽 ENSURE BROWSER IS ALWAYS CLOSED
     if (browser) {
       await browser.close();
     }
   }
 });
 
-// 🔽 USE 'module.exports' TO EXPORT THE APP FOR VERCEL
 module.exports = app;
