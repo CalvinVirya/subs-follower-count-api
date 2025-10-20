@@ -15,10 +15,6 @@ app.get("/", (req, res) => {
   res.send("Hello from our API");
 });
 
-// =========================
-// 📺 YOUTUBE API ROUTE
-// (This route is unchanged)
-// =========================
 app.get("/youtube/:handle", async (req, res) => {
   try {
     const { handle } = req.params;
@@ -35,105 +31,57 @@ app.get("/youtube/:handle", async (req, res) => {
   }
 });
 
-// =========================
-// 📸 INSTAGRAM SCRAPER ROUTE
-// =========================
 app.get("/instagram/:username", async (req, res) => {
-  const { username } = req.params;
-  let browser = null;
+  const username = req.params.username; // example: /tiktok/taylorswift
+
+  const options = {
+    method: "GET",
+    url: "https://instagram-looter2.p.rapidapi.com/profile2",
+    params: { uniqueId: username },
+    headers: {
+      "x-rapidapi-key": process.env.RAPIDAPI_KEY, // use .env for security
+      "x-rapidapi-host": "instagram-looter2.p.rapidapi.com",
+    },
+  };
 
   try {
-    // 🔽 2. LAUNCH PUPPETEER WITH THE NEW PACKAGE
-    browser = await puppeteer.launch({
-      args: chrome.args,
-      // 🔽 3. ADD '()' TO 'executablePath'
-      executablePath: await chrome.executablePath(),
-      // 🔽 4. USE 'headless: "new"'
-      headless: "new",
+    const response = await axios.request(options);
+    const data = response.data;
+
+    res.json({
+      username,
+      followers: data.follower_count || "Not found",
     });
-
-    const page = await browser.newPage();
-    await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-    );
-
-    await page.goto(`https://www.instagram.com/${username}/`, {
-      waitUntil: "networkidle2",
-    });
-
-    const followers = await page.evaluate(() => {
-      const el = document.querySelector('meta[name="description"]');
-      const text = el ? el.getAttribute("content") : "";
-      const match = text.match(/([\d.,]+)\s*([KMB])?\s*Followers/i);
-
-      if (!match) return "Not found";
-
-      const value = parseFloat(match[1].replace(/,/g, ""));
-      const suffix = match[2] ? match[2].toUpperCase() : null;
-      const multipliers = { K: 1e3, M: 1e6, B: 1e9, null: 1 };
-
-      return Math.round(value * multipliers[suffix]);
-    });
-
-    res.json({ username, followers });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to scrape Instagram" });
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch TikTok data" });
   }
 });
 
-// =========================
-// 🎵 TIKTOK SCRAPER ROUTE
-// =========================
 app.get("/tiktok/:username", async (req, res) => {
-  const { username } = req.params;
-  let browser = null;
+  const username = req.params.username; // example: /tiktok/taylorswift
+
+  const options = {
+    method: "GET",
+    url: "https://tiktok-api23.p.rapidapi.com/api/user/info",
+    params: { uniqueId: username },
+    headers: {
+      "x-rapidapi-key": process.env.RAPIDAPI_KEY, // use .env for security
+      "x-rapidapi-host": "tiktok-api23.p.rapidapi.com",
+    },
+  };
 
   try {
-    // 🔽 2. LAUNCH PUPPETEER WITH THE NEW PACKAGE
-    browser = await puppeteer.launch({
-      args: chrome.args,
-      // 🔽 3. ADD '()' TO 'executablePath'
-      executablePath: await chrome.executablePath(),
-      // 🔽 4. USE 'headless: "new"'
-      headless: "new",
+    const response = await axios.request(options);
+    const data = response.data;
+
+    res.json({
+      username,
+      followers: data.userInfo.stats.followerCount || "Not found",
     });
-
-    const page = await browser.newPage();
-    await page.setUserAgent(
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
-    );
-
-    await page.goto(`https://www.tiktok.com/@${username}`, {
-      waitUntil: "networkidle2",
-    });
-
-    const followers = await page.evaluate(() => {
-      const el = document.querySelector('meta[name="description"]');
-      const text = el ? el.getAttribute("content") : "";
-      const match = text.match(/([\d.,]+(?:[.,]\d+)?)\s*([KMB])?\s*Followers/i);
-
-      if (!match) return "Not found";
-
-      const value = parseFloat(match[1].replace(/,/g, ""));
-      const suffix = match[2] ? match[2].toUpperCase() : null;
-      const multipliers = { K: 1e3, M: 1e6, B: 1e9, null: 1 };
-
-      return Math.round(value * multipliers[suffix]);
-    });
-
-    res.json({ username, followers });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to scrape TikTok" });
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch TikTok data" });
   }
 });
 
