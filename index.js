@@ -21,7 +21,10 @@ app.get("/youtube/:handle", async (req, res) => {
     const stats = response.data.items?.[0]?.statistics;
     if (!stats) return res.status(404).json({ error: "Channel not found" });
 
-    res.json({ handle, subscribers: parseInt(stats.subscriberCount, 10) });
+    res.json({
+      username: handle,
+      followers: parseInt(stats.subscriberCount, 10),
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch YouTube data" });
