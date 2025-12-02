@@ -1,11 +1,11 @@
 const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
-import { StreamVideoServerClient } from "@stream-io/video-client";
+import { StreamVideoClient } from "@stream-io/video-client";
 
 dotenv.config();
 
-const client = new StreamVideoServerClient({
+const client = new StreamVideoClient({
   apiKey: process.env.STREAM_API_KEY,
   apiSecret: process.env.STREAM_API_SECRET,
 });
