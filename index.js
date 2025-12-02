@@ -8,10 +8,10 @@ dotenv.config();
 console.log("STREAM KEY  =", process.env.STREAM_API_KEY);
 console.log("STREAM SECRET =", process.env.STREAM_API_SECRET);
 
-const client = new StreamClient({
-  apiKey: process.env.STREAM_API_KEY,
-  secret: process.env.STREAM_API_SECRET,
-});
+const client = new StreamClient(
+  process.env.STREAM_API_KEY,
+  process.env.STREAM_API_SECRET
+);
 
 const app = express();
 const baseApiUrl = "https://youtube.googleapis.com/youtube/v3";
