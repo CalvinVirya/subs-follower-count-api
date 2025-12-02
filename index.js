@@ -1,8 +1,14 @@
 const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
+import { StreamVideoServerClient } from "@stream-io/video-node";
 
 dotenv.config();
+
+const client = new StreamVideoServerClient({
+  apiKey: process.env.STREAM_API_KEY,
+  apiSecret: process.env.STREAM_API_SECRET,
+});
 
 const app = express();
 const baseApiUrl = "https://youtube.googleapis.com/youtube/v3";
@@ -11,6 +17,12 @@ const apiKey = process.env.YOUTUBE_API_KEY;
 app.get("/", (req, res) => {
   res.send("Hello from our API");
 });
+
+app.get("/audio_room/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const token = serverClient.createToken(userId);
+  res.json({ token });
+})
 
 app.get("/youtube/:handle", async (req, res) => {
   try {
