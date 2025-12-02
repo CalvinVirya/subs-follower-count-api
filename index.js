@@ -1,11 +1,11 @@
 const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
-import { StreamVideoClient } from "@stream-io/video-client";
+import { StreamClient } from "@stream-io/node-sdk";
 
 dotenv.config();
 
-const client = new StreamVideoClient({
+const client = new StreamClient({
   apiKey: process.env.STREAM_API_KEY,
   apiSecret: process.env.STREAM_API_SECRET,
 });
@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 
 app.get("/audio_room/:userId", (req, res) => {
   const userId = req.params.userId;
-  const token = client.createToken(userId);
+  const token = client.generateUserToken(userId);
   res.json({ token });
 })
 
