@@ -1,7 +1,7 @@
 const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
-import { StreamVideoServerClient } from "@stream-io/video-node";
+import { StreamVideoServerClient } from "@stream-io/video-client";
 
 dotenv.config();
 
