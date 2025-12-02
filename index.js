@@ -5,6 +5,9 @@ const { StreamClient } = require("@stream-io/node-sdk");
 
 dotenv.config();
 
+console.log("STREAM KEY  =", process.env.STREAM_API_KEY);
+console.log("STREAM SECRET =", process.env.STREAM_API_SECRET);
+
 const client = new StreamClient({
   apiKey: process.env.STREAM_API_KEY,
   secret: process.env.STREAM_API_SECRET,
