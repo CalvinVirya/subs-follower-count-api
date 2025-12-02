@@ -1,13 +1,13 @@
 const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
-import { StreamClient } from "@stream-io/node-sdk";
+const { StreamClient } = require("@stream-io/node-sdk");
 
 dotenv.config();
 
 const client = new StreamClient({
   apiKey: process.env.STREAM_API_KEY,
-  apiSecret: process.env.STREAM_API_SECRET,
+  secret: process.env.STREAM_API_SECRET,
 });
 
 const app = express();
@@ -22,7 +22,7 @@ app.get("/audio_room/:userId", (req, res) => {
   const userId = req.params.userId;
   const token = client.generateUserToken(userId);
   res.json({ token });
-})
+});
 
 app.get("/youtube/:handle", async (req, res) => {
   try {
