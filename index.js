@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
 
 app.get("/audio_room/:userId", (req, res) => {
   const userId = req.params.userId;
-  const token = client.generateUserToken(userId);
+  const token = client.createToken(userId);
   res.json({ token });
 });
 
